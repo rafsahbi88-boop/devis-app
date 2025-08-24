@@ -18,13 +18,14 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install dependencies
+      - name: Initialize npm and install Capacitor
         run: |
-          npm install -g @capacitor/cli cordova-res
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/android
 
       - name: Initialize Capacitor
         run: |
-          npx cap init "Devis DZ" "com.rafik.devisdz"
+          npx cap init "Devis DZ" "com.rafik.devisdz" --web-dir=.
           npx cap add android
 
       - name: Copy web files
