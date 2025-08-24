@@ -51,6 +51,7 @@ jobs:
       - name: Build Signed APK & AAB
         run: |
           cd android
+          ./gradlew clean
           ./gradlew bundleRelease
           ./gradlew assembleRelease
 
