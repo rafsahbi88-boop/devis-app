@@ -1,0 +1,11 @@
+{
+  "name": "mondevis",
+  "version": "1.0.0",
+  "description": "App devis en HTML/CSS/JS",
+  "scripts": {
+    "build": "cordova build android"
+  },
+  "dependencies": {
+    "cordova": "^12.0.0"
+  }
+}
