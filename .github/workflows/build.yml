@@ -1,48 +1,57 @@
 name: Build Android App
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: '18'
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - name: Install dependencies
+        run: |
+          npm install -g @capacitor/cli cordova-res
+
+      - name: Initialize Capacitor
+        run: |
+          npx cap init "Devis DZ" "com.rafik.devisdz"
+          npx cap add android
+
+      - name: Copy web files
+        run: |
+          mkdir -p android/app/src/main/assets/public
+          cp -r ./* android/app/src/main/assets/public || true
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
         with:
-          distribution: temurin
-          java-version: "17"
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          api-level: 34
-          build-tools: "34.0.0"
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/my-release.keystore
 
-      - name: Install Cordova
-        run: npm install -g cordova@12
-
-      - name: Add Android platform
-        run: cordova platform add android@12
-
-      - name: Build Release APK
-        run: cordova build android --release -- --packageType=apk
-
-      - name: Build Release AAB
-        run: cordova build android --release -- --packageType=bundle
+      - name: Build Signed APK & AAB
+        run: |
+          cd android
+          ./gradlew bundleRelease
+          ./gradlew assembleRelease
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: android-builds
           path: |
-            platforms/android/app/build/outputs/apk/release/*.apk
-            platforms/android/app/build/outputs/bundle/release/*.aab
+            android/app/build/outputs/bundle/release/app-release.aab
+            android/app/build/outputs/apk/release/app-release.apk
